@@ -17,379 +17,195 @@
     html { scroll-behavior: smooth; }
     body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; overflow-x: hidden; }
     ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
 
     /* ===== ナビ ===== */
     nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       display: flex; justify-content: space-between; align-items: center;
-      padding: 1.2rem 3rem;
-      backdrop-filter: blur(16px);
-      background: rgba(8,8,16,0.6);
+      padding: 1rem 3rem;
+      backdrop-filter: blur(12px);
+      background: rgba(8,8,16,0.75);
       border-bottom: 1px solid var(--border);
     }
     .nav-logo {
-      font-size: 1.2rem; font-weight: 800; letter-spacing: 3px;
+      font-size: 1.1rem; font-weight: 800; letter-spacing: 3px;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
     .nav-links a {
       color: var(--muted); text-decoration: none; font-size: 0.8rem;
-      letter-spacing: 2px; text-transform: uppercase;
-      transition: color 0.3s; position: relative;
-    }
-    .nav-links a::after {
-      content: ''; position: absolute; left: 0; bottom: -4px;
-      width: 0; height: 1px; background: var(--accent2); transition: width 0.3s;
+      letter-spacing: 2px; text-transform: uppercase; transition: color 0.2s;
     }
     .nav-links a:hover { color: #fff; }
-    .nav-links a:hover::after { width: 100%; }
 
-    /* ===== ヒーロー：全画面スライダー ===== */
+    /* ===== ヒーロー：CSSグラデ背景＋スライダー ===== */
     #hero {
       position: relative; height: 100vh; overflow: hidden;
+      /* 画像が来るまでの背景 */
+      background: linear-gradient(135deg, #0a0520 0%, #1a0a3a 50%, #0d1a2e 100%);
     }
-    .slides {
-      display: flex; height: 100%;
-      transition: transform 0.9s cubic-bezier(0.77,0,0.18,1);
-    }
-    .slide {
-      min-width: 100%; height: 100%; position: relative; flex-shrink: 0;
-    }
+    .slides { display: flex; height: 100%; transition: transform 0.8s cubic-bezier(0.77,0,0.18,1); }
+    .slide { min-width: 100%; height: 100%; position: relative; flex-shrink: 0; }
     .slide img {
       width: 100%; height: 100%; object-fit: cover;
-      transform: scale(1.05);
       transition: transform 6s ease;
+      transform: scale(1.05);
     }
     .slide.active img { transform: scale(1); }
     .slide-overlay {
       position: absolute; inset: 0;
-      background: linear-gradient(to right, rgba(8,8,16,0.85) 0%, rgba(8,8,16,0.3) 60%, transparent 100%);
+      background: linear-gradient(to right, rgba(8,8,16,0.88) 0%, rgba(8,8,16,0.3) 60%, transparent 100%);
     }
     .hero-content {
-      position: absolute; top: 50%; left: 8vw;
-      transform: translateY(-50%);
-      max-width: 600px;
+      position: absolute; top: 50%; left: 8vw; transform: translateY(-50%);
+      max-width: 560px;
     }
     .hero-tag {
-      display: inline-block; font-size: 0.7rem; letter-spacing: 4px;
+      display: inline-block; font-size: 0.68rem; letter-spacing: 4px;
       text-transform: uppercase; color: var(--accent2);
-      border: 1px solid var(--border); padding: 0.4rem 1rem;
+      border: 1px solid var(--border); padding: 0.35rem 1rem;
       border-radius: 50px; margin-bottom: 1.5rem;
-      animation: fadeSlideUp 1s ease 0.2s both;
+      animation: fadeUp 0.8s ease 0.2s both;
     }
     .hero-title {
-      font-size: clamp(3rem, 8vw, 7rem); font-weight: 900;
-      line-height: 0.95; letter-spacing: -3px;
-      color: #fff;
-      animation: fadeSlideUp 1s ease 0.4s both;
+      font-size: clamp(2.8rem, 7vw, 6rem); font-weight: 900;
+      line-height: 0.95; letter-spacing: -2px; color: #fff;
+      animation: fadeUp 0.8s ease 0.35s both;
     }
-    .hero-title span {
-      background: linear-gradient(135deg, var(--accent2), #f0abfc);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .hero-sub {
-      font-size: 1.05rem; color: var(--muted); margin-top: 1.5rem; line-height: 1.8;
-      animation: fadeSlideUp 1s ease 0.6s both;
-    }
-    .hero-btns {
-      display: flex; gap: 1rem; margin-top: 2.5rem;
-      animation: fadeSlideUp 1s ease 0.8s both;
-    }
+    .hero-title span { background: linear-gradient(135deg, var(--accent2), #f0abfc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero-sub { font-size: 1rem; color: var(--muted); margin-top: 1.2rem; line-height: 1.8; animation: fadeUp 0.8s ease 0.5s both; }
+    .hero-btns { display: flex; gap: 1rem; margin-top: 2rem; animation: fadeUp 0.8s ease 0.65s both; }
     .btn {
-      padding: 0.85rem 2.2rem; border-radius: 50px; font-size: 0.9rem;
+      padding: 0.75rem 2rem; border-radius: 50px; font-size: 0.85rem;
       font-weight: 700; letter-spacing: 1px; text-decoration: none;
-      border: none; cursor: pointer; display: inline-block;
-      transition: transform 0.3s, box-shadow 0.3s;
+      border: none; cursor: pointer; display: inline-block; transition: transform 0.2s, box-shadow 0.2s;
     }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #fff; box-shadow: 0 4px 24px rgba(124,92,191,0.5);
-    }
-    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 36px rgba(124,92,191,0.7); }
-    .btn-ghost {
-      background: transparent; color: #fff;
-      border: 1px solid rgba(255,255,255,0.3);
-    }
-    .btn-ghost:hover { border-color: #fff; transform: translateY(-3px); }
+    .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; box-shadow: 0 4px 20px rgba(124,92,191,0.4); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(124,92,191,0.6); }
+    .btn-ghost { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.3); }
+    .btn-ghost:hover { border-color: #fff; transform: translateY(-2px); }
 
-    /* スライダーコントロール */
-    .slider-dots {
-      position: absolute; bottom: 2rem; left: 50%;
-      transform: translateX(-50%);
-      display: flex; gap: 0.6rem; z-index: 10;
-    }
-    .dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: rgba(255,255,255,0.3);
-      cursor: pointer; transition: all 0.3s;
-    }
-    .dot.active { background: var(--accent2); width: 24px; border-radius: 3px; }
+    .slider-dots { position: absolute; bottom: 1.5rem; left: 50%; transform: translateX(-50%); display: flex; gap: 0.5rem; z-index: 10; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: all 0.3s; }
+    .dot.active { background: var(--accent2); width: 20px; border-radius: 3px; }
     .slider-arrow {
       position: absolute; top: 50%; z-index: 10;
-      width: 48px; height: 48px;
-      background: rgba(255,255,255,0.1);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 50%; color: #fff; font-size: 1.2rem;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transform: translateY(-50%);
-      transition: background 0.3s;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+      color: #fff; font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transform: translateY(-50%); transition: background 0.2s;
     }
-    .slider-arrow:hover { background: rgba(124,92,191,0.5); }
-    .slider-arrow.prev { left: 2rem; }
-    .slider-arrow.next { right: 2rem; }
-
-    /* スクロールインジケーター */
-    .scroll-hint {
-      position: absolute; bottom: 2rem; right: 3rem;
-      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
-      color: rgba(255,255,255,0.4); font-size: 0.65rem; letter-spacing: 3px;
-      text-transform: uppercase; animation: bounce 2s ease infinite;
-    }
-    .scroll-hint::after {
-      content: ''; width: 1px; height: 48px;
-      background: linear-gradient(to bottom, rgba(255,255,255,0.4), transparent);
-    }
-
-    /* ===== フォトストリップ（横スクロール） ===== */
-    #photostrip {
-      position: relative; z-index: 1;
-      padding: 5rem 0;
-      overflow: hidden;
-    }
-    .strip-label {
-      text-align: center; font-size: 0.7rem; letter-spacing: 5px;
-      text-transform: uppercase; color: var(--accent2); margin-bottom: 2rem;
-    }
-    .strip-track {
-      display: flex; gap: 1rem;
-      width: max-content;
-      animation: marquee 30s linear infinite;
-    }
-    #photostrip:hover .strip-track { animation-play-state: paused; }
-    .strip-track img {
-      height: 220px; width: 350px; object-fit: cover;
-      border-radius: 12px; flex-shrink: 0;
-      filter: brightness(0.7) saturate(0.8);
-      transition: filter 0.4s, transform 0.4s;
-      cursor: pointer;
-    }
-    .strip-track img:hover { filter: brightness(1) saturate(1.2); transform: scale(1.04); }
+    .slider-arrow:hover { background: rgba(124,92,191,0.4); }
+    .slider-arrow.prev { left: 1.5rem; }
+    .slider-arrow.next { right: 1.5rem; }
 
     /* ===== セクション共通 ===== */
-    .sec {
-      position: relative; z-index: 1;
-      padding: 8rem 4vw;
-      max-width: 1300px; margin: 0 auto;
-    }
-    .sec-eyebrow {
-      font-size: 0.7rem; letter-spacing: 5px; text-transform: uppercase;
-      color: var(--accent2); margin-bottom: 0.5rem;
-    }
-    .sec-title {
-      font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 900;
-      line-height: 1; margin-bottom: 1rem; color: #fff;
-    }
-    .sec-bar {
-      width: 50px; height: 3px;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      border-radius: 2px; margin-bottom: 4rem;
-    }
-    .fade-up { opacity: 0; transform: translateY(50px); transition: opacity 0.8s ease, transform 0.8s ease; }
+    .sec { padding: 7rem 4vw; max-width: 1200px; margin: 0 auto; }
+    .sec-eyebrow { font-size: 0.68rem; letter-spacing: 5px; text-transform: uppercase; color: var(--accent2); margin-bottom: 0.4rem; }
+    .sec-title { font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 900; color: #fff; margin-bottom: 0.8rem; }
+    .sec-bar { width: 44px; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 2px; margin-bottom: 3rem; }
+    .fade-up { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease; }
     .fade-up.visible { opacity: 1; transform: translateY(0); }
 
-    /* ===== ギャラリー：ホバーで拡大・周囲縮小 ===== */
-    #gallery { padding: 8rem 0; background: transparent; }
-    .gallery-header { padding: 0 4vw; max-width: 1300px; margin: 0 auto 3rem; }
+    /* ===== ギャラリー：ホバー拡大・周囲縮小 ===== */
+    #gallery { padding: 7rem 0; }
+    .gallery-header { padding: 0 4vw; max-width: 1200px; margin: 0 auto 2.5rem; }
     .gallery-grid {
-      display: flex;
-      gap: 0.5rem;
-      padding: 0 2vw;
-      height: 460px;
+      display: flex; gap: 4px; padding: 0 2vw; height: 420px;
     }
     .gitem {
-      flex: 1;
-      position: relative;
-      overflow: hidden;
-      border-radius: 16px;
-      cursor: pointer;
-      transition: flex 0.5s cubic-bezier(0.4,0,0.2,1);
+      flex: 1; position: relative; overflow: hidden; border-radius: 12px; cursor: pointer;
+      transition: flex 0.45s cubic-bezier(0.4,0,0.2,1);
     }
-    .gallery-grid:hover .gitem { flex: 0.4; }
+    .gallery-grid:hover .gitem { flex: 0.35; }
     .gallery-grid .gitem:hover { flex: 3.5; }
     .gitem img {
       width: 100%; height: 100%; object-fit: cover;
-      transition: transform 0.5s ease, filter 0.5s ease;
-      filter: brightness(0.6) saturate(0.7);
+      filter: brightness(0.55) saturate(0.7);
+      transition: filter 0.45s;
     }
-    .gitem:hover img { transform: scale(1.08); filter: brightness(0.9) saturate(1.2); }
+    .gitem:hover img { filter: brightness(0.85) saturate(1.1); }
     .gitem-info {
       position: absolute; inset: 0;
-      background: linear-gradient(to top, rgba(8,8,16,0.9) 0%, transparent 50%);
+      background: linear-gradient(to top, rgba(8,8,16,0.92) 0%, transparent 55%);
       display: flex; flex-direction: column; justify-content: flex-end;
-      padding: 2rem;
-      opacity: 0; transition: opacity 0.4s;
+      padding: 1.5rem; opacity: 0; transition: opacity 0.35s;
     }
     .gitem:hover .gitem-info { opacity: 1; }
-    .gitem-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.6rem; }
-    .gtag {
-      font-size: 0.65rem; padding: 0.2rem 0.6rem; border-radius: 50px;
-      background: rgba(192,132,252,0.25); color: var(--accent2); letter-spacing: 1px;
-    }
-    .gitem-title { font-size: 1.3rem; font-weight: 800; color: #fff; margin-bottom: 0.4rem; }
-    .gitem-desc { font-size: 0.8rem; color: rgba(255,255,255,0.7); line-height: 1.5; }
-    .gitem-link {
-      display: inline-flex; align-items: center; gap: 0.4rem;
-      margin-top: 1rem; font-size: 0.8rem; font-weight: 700;
-      color: var(--accent2); text-decoration: none;
-      border: 1px solid var(--accent2); padding: 0.4rem 1rem;
-      border-radius: 50px; width: fit-content;
-      transition: background 0.3s, color 0.3s;
-    }
-    .gitem-link:hover { background: var(--accent2); color: #000; }
+    .gitem-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+    .gtag { font-size: 0.62rem; padding: 0.2rem 0.6rem; border-radius: 50px; background: rgba(192,132,252,0.2); color: var(--accent2); letter-spacing: 1px; }
+    .gitem-title { font-size: 1.2rem; font-weight: 800; color: #fff; margin-bottom: 0.3rem; }
+    .gitem-desc { font-size: 0.78rem; color: rgba(255,255,255,0.65); line-height: 1.5; }
 
-    /* ===== スキルセクション ===== */
-    .skills-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 1rem;
-    }
-    .skill-card {
-      position: relative; overflow: hidden;
-      border-radius: 16px;
-      aspect-ratio: 1;
-      cursor: default;
-    }
-    .skill-card img {
-      width: 100%; height: 100%; object-fit: cover;
-      transition: transform 0.5s, filter 0.5s;
-      filter: brightness(0.4) saturate(0.5);
-    }
-    .skill-card:hover img { transform: scale(1.1); filter: brightness(0.6) saturate(0.8); }
+    /* ===== スキル ===== */
+    .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 1rem; }
+    .skill-card { position: relative; overflow: hidden; border-radius: 14px; aspect-ratio: 1; }
+    .skill-card img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.35) saturate(0.5); transition: transform 0.4s, filter 0.4s; }
+    .skill-card:hover img { transform: scale(1.08); filter: brightness(0.55) saturate(0.8); }
     .skill-body {
-      position: absolute; inset: 0;
-      display: flex; flex-direction: column;
-      justify-content: flex-end; padding: 1.5rem;
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      justify-content: flex-end; padding: 1.2rem;
       background: linear-gradient(to top, rgba(8,8,16,0.85), transparent 60%);
     }
-    .skill-icon2 { font-size: 2rem; margin-bottom: 0.5rem; }
-    .skill-name2 { font-weight: 800; font-size: 0.95rem; margin-bottom: 0.5rem; }
+    .skill-icon2 { font-size: 1.8rem; margin-bottom: 0.4rem; }
+    .skill-name2 { font-weight: 800; font-size: 0.9rem; margin-bottom: 0.4rem; }
     .skill-bar-wrap { height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
-    .skill-bar {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      width: 0; transition: width 1.2s ease;
-    }
+    .skill-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); width: 0; transition: width 1s ease; }
 
-    /* ===== ゲームセクション ===== */
-    .games-row {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.5rem;
-    }
-    .game-card {
-      position: relative; overflow: hidden;
-      border-radius: 20px; height: 300px;
-      border: 1px solid var(--border);
-      text-decoration: none; display: block;
-    }
-    .game-card img {
-      width: 100%; height: 100%; object-fit: cover;
-      transition: transform 0.6s ease, filter 0.6s ease;
-      filter: brightness(0.5) saturate(0.6);
-    }
-    .game-card:hover img { transform: scale(1.1); filter: brightness(0.7) saturate(1); }
-    .game-overlay {
-      position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(124,92,191,0.4), transparent);
-      opacity: 0; transition: opacity 0.4s;
-    }
+    /* ===== ゲーム ===== */
+    .games-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
+    .game-card { position: relative; overflow: hidden; border-radius: 18px; height: 260px; text-decoration: none; display: block; border: 1px solid var(--border); }
+    .game-card img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.45) saturate(0.6); transition: transform 0.5s, filter 0.5s; }
+    .game-card:hover img { transform: scale(1.06); filter: brightness(0.65) saturate(1); }
+    .game-overlay { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(124,92,191,0.35), transparent); opacity: 0; transition: opacity 0.35s; }
     .game-card:hover .game-overlay { opacity: 1; }
-    .game-body {
-      position: absolute; bottom: 0; left: 0; right: 0; padding: 2rem;
-      background: linear-gradient(to top, rgba(8,8,16,0.95), transparent);
-    }
-    .game-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
-    .game-title { font-size: 1.4rem; font-weight: 900; color: #fff; margin-bottom: 0.3rem; }
-    .game-desc { font-size: 0.85rem; color: var(--muted); }
+    .game-body { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem; background: linear-gradient(to top, rgba(8,8,16,0.95), transparent); }
+    .game-icon { font-size: 2rem; margin-bottom: 0.4rem; }
+    .game-title { font-size: 1.3rem; font-weight: 900; color: #fff; margin-bottom: 0.2rem; }
+    .game-desc { font-size: 0.8rem; color: var(--muted); }
     .game-play {
-      position: absolute; top: 1.5rem; right: 1.5rem;
-      background: rgba(192,132,252,0.2);
-      border: 1px solid var(--accent2);
-      color: var(--accent2); font-size: 0.75rem; font-weight: 700;
-      letter-spacing: 2px; padding: 0.4rem 1rem; border-radius: 50px;
-      opacity: 0; transform: translateY(-8px);
-      transition: opacity 0.3s, transform 0.3s;
+      position: absolute; top: 1.2rem; right: 1.2rem;
+      background: rgba(192,132,252,0.15); border: 1px solid var(--accent2);
+      color: var(--accent2); font-size: 0.7rem; font-weight: 700; letter-spacing: 2px;
+      padding: 0.35rem 0.9rem; border-radius: 50px;
+      opacity: 0; transform: translateY(-6px); transition: opacity 0.25s, transform 0.25s;
     }
     .game-card:hover .game-play { opacity: 1; transform: translateY(0); }
 
     /* ===== コンタクト ===== */
     #contact { text-align: center; }
-    .contact-visual {
-      position: relative; border-radius: 24px; overflow: hidden;
-      max-width: 800px; margin: 0 auto;
-    }
-    .contact-visual img {
-      width: 100%; height: 400px; object-fit: cover;
-      filter: brightness(0.3) saturate(0.5);
-    }
-    .contact-inner {
-      position: absolute; inset: 0;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      padding: 3rem;
-    }
-    .contact-desc { color: rgba(255,255,255,0.7); margin: 1rem 0 2rem; line-height: 1.8; font-size: 1.05rem; }
-    .contact-form { width: 100%; max-width: 480px; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem; }
+    .contact-visual { position: relative; border-radius: 20px; overflow: hidden; max-width: 750px; margin: 0 auto; }
+    .contact-visual img { width: 100%; height: 380px; object-fit: cover; filter: brightness(0.25) saturate(0.5); }
+    .contact-inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2.5rem; }
+    .contact-desc { color: rgba(255,255,255,0.65); margin: 0.8rem 0 1.8rem; line-height: 1.8; }
+    .contact-form { width: 100%; max-width: 460px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.6rem; }
     .f-input {
-      width: 100%;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 10px; padding: 0.8rem 1rem;
-      color: #fff; font-size: 0.9rem; font-family: inherit;
-      outline: none; transition: border-color 0.3s, box-shadow 0.3s;
+      width: 100%; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px; padding: 0.75rem 0.9rem; color: #fff; font-size: 0.88rem;
+      font-family: inherit; outline: none; transition: border-color 0.2s;
     }
-    .f-input:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(192,132,252,0.15); }
+    .f-input:focus { border-color: var(--accent2); }
     .f-input.full { grid-column: 1 / -1; }
-    textarea.f-input { resize: vertical; min-height: 100px; }
+    textarea.f-input { resize: vertical; min-height: 90px; }
     .btn-send {
-      width: 100%; margin-top: 0.5rem; padding: 1rem;
+      width: 100%; margin-top: 0.5rem; padding: 0.9rem;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #fff; border: none; border-radius: 10px;
-      font-size: 1rem; font-weight: 800; cursor: pointer; letter-spacing: 1px;
-      transition: transform 0.3s, box-shadow 0.3s;
+      color: #fff; border: none; border-radius: 8px; font-size: 0.95rem;
+      font-weight: 800; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
     }
-    .btn-send:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(124,92,191,0.6); }
+    .btn-send:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(124,92,191,0.5); }
 
-    /* ===== フッター ===== */
-    footer {
-      position: relative; z-index: 1; text-align: center;
-      padding: 2rem; border-top: 1px solid var(--border);
-      color: var(--muted); font-size: 0.8rem;
-    }
+    footer { text-align: center; padding: 1.5rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.78rem; }
 
-    /* ===== キーフレーム ===== */
-    @keyframes fadeSlideUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50%       { transform: translateY(10px); }
-    }
-    @keyframes marquee {
-      from { transform: translateX(0); }
-      to   { transform: translateX(-50%); }
-    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
 
-    /* ===== レスポンシブ ===== */
     @media (max-width: 768px) {
       .nav-links { display: none; }
-      .gallery-grid { height: 280px; }
+      .gallery-grid { height: 260px; }
       .games-row { grid-template-columns: 1fr; }
       .form-row { grid-template-columns: 1fr; }
       nav { padding: 1rem 1.5rem; }
@@ -398,7 +214,6 @@
 </head>
 <body>
 
-<!-- ナビ -->
 <nav>
   <div class="nav-logo">PORTFOLIO</div>
   <ul class="nav-links">
@@ -410,27 +225,22 @@
   </ul>
 </nav>
 
-<!-- ヒーロー：全画面スライダー -->
+<!-- ヒーロー -->
 <section id="hero">
   <div class="slides" id="slides">
     <div class="slide active">
-      <img src="https://picsum.photos/seed/hero1/1600/900" alt="">
+      <img src="https://picsum.photos/seed/hero1/1200/675" alt="" loading="eager">
       <div class="slide-overlay"></div>
     </div>
     <div class="slide">
-      <img src="https://picsum.photos/seed/hero2/1600/900" alt="">
+      <img src="https://picsum.photos/seed/hero2/1200/675" alt="" loading="lazy">
       <div class="slide-overlay"></div>
     </div>
     <div class="slide">
-      <img src="https://picsum.photos/seed/hero3/1600/900" alt="">
-      <div class="slide-overlay"></div>
-    </div>
-    <div class="slide">
-      <img src="https://picsum.photos/seed/hero4/1600/900" alt="">
+      <img src="https://picsum.photos/seed/hero3/1200/675" alt="" loading="lazy">
       <div class="slide-overlay"></div>
     </div>
   </div>
-
   <div class="hero-content">
     <div class="hero-tag">Creative Portfolio 2026</div>
     <h1 class="hero-title">Visual<br><span>Creative</span><br>Portfolio</h1>
@@ -440,30 +250,21 @@
       <a href="#contact" class="btn btn-ghost">Contact</a>
     </div>
   </div>
-
   <div class="slider-arrow prev" id="prevBtn">&#8592;</div>
   <div class="slider-arrow next" id="nextBtn">&#8594;</div>
-
   <div class="slider-dots" id="dots"></div>
-  <div class="scroll-hint">Scroll</div>
 </section>
 
-<!-- フォトストリップ（無限横スクロール） -->
-<div id="photostrip">
-  <div class="strip-label">Photo Gallery</div>
-  <div class="strip-track" id="stripTrack"></div>
-</div>
-
-<!-- ギャラリー：ホバーで拡大・周囲縮小 -->
-<section id="gallery" style="padding: 8rem 0; background: transparent;">
+<!-- ギャラリー -->
+<section id="gallery" style="padding: 7rem 0;">
   <div class="gallery-header fade-up">
     <p class="sec-eyebrow">Featured Works</p>
     <h2 class="sec-title">Works</h2>
     <div class="sec-bar"></div>
   </div>
-  <div class="gallery-grid" id="galleryGrid">
+  <div class="gallery-grid">
     <div class="gitem fade-up">
-      <img src="https://picsum.photos/seed/gal1/800/600" alt="Project Alpha">
+      <img src="https://picsum.photos/seed/gal1/600/500" alt="Project Alpha" loading="lazy">
       <div class="gitem-info">
         <div class="gitem-tags"><span class="gtag">React</span><span class="gtag">TypeScript</span></div>
         <div class="gitem-title">Project Alpha</div>
@@ -471,7 +272,7 @@
       </div>
     </div>
     <div class="gitem fade-up">
-      <img src="https://picsum.photos/seed/gal2/800/600" alt="Project Beta">
+      <img src="https://picsum.photos/seed/gal2/600/500" alt="Project Beta" loading="lazy">
       <div class="gitem-info">
         <div class="gitem-tags"><span class="gtag">HTML</span><span class="gtag">CSS</span><span class="gtag">JS</span></div>
         <div class="gitem-title">Project Beta</div>
@@ -479,7 +280,7 @@
       </div>
     </div>
     <div class="gitem fade-up">
-      <img src="https://picsum.photos/seed/gal3/800/600" alt="Project Gamma">
+      <img src="https://picsum.photos/seed/gal3/600/500" alt="Project Gamma" loading="lazy">
       <div class="gitem-info">
         <div class="gitem-tags"><span class="gtag">Python</span><span class="gtag">API</span></div>
         <div class="gitem-title">Project Gamma</div>
@@ -487,7 +288,7 @@
       </div>
     </div>
     <div class="gitem fade-up">
-      <img src="https://picsum.photos/seed/gal4/800/600" alt="Project Delta">
+      <img src="https://picsum.photos/seed/gal4/600/500" alt="Project Delta" loading="lazy">
       <div class="gitem-info">
         <div class="gitem-tags"><span class="gtag">UI/UX</span><span class="gtag">Figma</span></div>
         <div class="gitem-title">Project Delta</div>
@@ -495,7 +296,7 @@
       </div>
     </div>
     <div class="gitem fade-up">
-      <img src="https://picsum.photos/seed/gal5/800/600" alt="Project Epsilon">
+      <img src="https://picsum.photos/seed/gal5/600/500" alt="Project Epsilon" loading="lazy">
       <div class="gitem-info">
         <div class="gitem-tags"><span class="gtag">Next.js</span><span class="gtag">SQL</span></div>
         <div class="gitem-title">Project Epsilon</div>
@@ -505,7 +306,7 @@
   </div>
 </section>
 
-<!-- スキルセクション -->
+<!-- スキル -->
 <section class="sec" id="skills">
   <div class="fade-up">
     <p class="sec-eyebrow">Expertise</p>
@@ -513,58 +314,16 @@
     <div class="sec-bar"></div>
   </div>
   <div class="skills-grid">
-    <div class="skill-card fade-up">
-      <img src="https://picsum.photos/seed/sk1/400/400" alt="">
-      <div class="skill-body">
-        <div class="skill-icon2">🌐</div>
-        <div class="skill-name2">HTML / CSS</div>
-        <div class="skill-bar-wrap"><div class="skill-bar" data-width="95"></div></div>
-      </div>
-    </div>
-    <div class="skill-card fade-up">
-      <img src="https://picsum.photos/seed/sk2/400/400" alt="">
-      <div class="skill-body">
-        <div class="skill-icon2">⚡</div>
-        <div class="skill-name2">JavaScript</div>
-        <div class="skill-bar-wrap"><div class="skill-bar" data-width="85"></div></div>
-      </div>
-    </div>
-    <div class="skill-card fade-up">
-      <img src="https://picsum.photos/seed/sk3/400/400" alt="">
-      <div class="skill-body">
-        <div class="skill-icon2">⚛️</div>
-        <div class="skill-name2">React</div>
-        <div class="skill-bar-wrap"><div class="skill-bar" data-width="78"></div></div>
-      </div>
-    </div>
-    <div class="skill-card fade-up">
-      <img src="https://picsum.photos/seed/sk4/400/400" alt="">
-      <div class="skill-body">
-        <div class="skill-icon2">🐍</div>
-        <div class="skill-name2">Python</div>
-        <div class="skill-bar-wrap"><div class="skill-bar" data-width="70"></div></div>
-      </div>
-    </div>
-    <div class="skill-card fade-up">
-      <img src="https://picsum.photos/seed/sk5/400/400" alt="">
-      <div class="skill-body">
-        <div class="skill-icon2">🎨</div>
-        <div class="skill-name2">UI Design</div>
-        <div class="skill-bar-wrap"><div class="skill-bar" data-width="80"></div></div>
-      </div>
-    </div>
-    <div class="skill-card fade-up">
-      <img src="https://picsum.photos/seed/sk6/400/400" alt="">
-      <div class="skill-body">
-        <div class="skill-icon2">🗄️</div>
-        <div class="skill-name2">SQL / DB</div>
-        <div class="skill-bar-wrap"><div class="skill-bar" data-width="65"></div></div>
-      </div>
-    </div>
+    <div class="skill-card fade-up"><img src="https://picsum.photos/seed/sk1/300/300" alt="" loading="lazy"><div class="skill-body"><div class="skill-icon2">🌐</div><div class="skill-name2">HTML / CSS</div><div class="skill-bar-wrap"><div class="skill-bar" data-width="95"></div></div></div></div>
+    <div class="skill-card fade-up"><img src="https://picsum.photos/seed/sk2/300/300" alt="" loading="lazy"><div class="skill-body"><div class="skill-icon2">⚡</div><div class="skill-name2">JavaScript</div><div class="skill-bar-wrap"><div class="skill-bar" data-width="85"></div></div></div></div>
+    <div class="skill-card fade-up"><img src="https://picsum.photos/seed/sk3/300/300" alt="" loading="lazy"><div class="skill-body"><div class="skill-icon2">⚛️</div><div class="skill-name2">React</div><div class="skill-bar-wrap"><div class="skill-bar" data-width="78"></div></div></div></div>
+    <div class="skill-card fade-up"><img src="https://picsum.photos/seed/sk4/300/300" alt="" loading="lazy"><div class="skill-body"><div class="skill-icon2">🐍</div><div class="skill-name2">Python</div><div class="skill-bar-wrap"><div class="skill-bar" data-width="70"></div></div></div></div>
+    <div class="skill-card fade-up"><img src="https://picsum.photos/seed/sk5/300/300" alt="" loading="lazy"><div class="skill-body"><div class="skill-icon2">🎨</div><div class="skill-name2">UI Design</div><div class="skill-bar-wrap"><div class="skill-bar" data-width="80"></div></div></div></div>
+    <div class="skill-card fade-up"><img src="https://picsum.photos/seed/sk6/300/300" alt="" loading="lazy"><div class="skill-body"><div class="skill-icon2">🗄️</div><div class="skill-name2">SQL / DB</div><div class="skill-bar-wrap"><div class="skill-bar" data-width="65"></div></div></div></div>
   </div>
 </section>
 
-<!-- ゲームセクション -->
+<!-- ゲーム -->
 <section class="sec" id="games">
   <div class="fade-up">
     <p class="sec-eyebrow">Playable</p>
@@ -573,23 +332,15 @@
   </div>
   <div class="games-row">
     <a href="games/drop.html" class="game-card fade-up">
-      <img src="https://picsum.photos/seed/gamedrop/900/500" alt="Color Drop">
+      <img src="https://picsum.photos/seed/gamedrop/700/400" alt="Color Drop" loading="lazy">
       <div class="game-overlay"></div>
-      <div class="game-body">
-        <div class="game-icon">🟪</div>
-        <div class="game-title">Color Drop</div>
-        <div class="game-desc">落ちゲー ／ ゴースト表示・即落とし対応</div>
-      </div>
+      <div class="game-body"><div class="game-icon">🟪</div><div class="game-title">Color Drop</div><div class="game-desc">落ちゲー ／ ゴースト表示・即落とし対応</div></div>
       <div class="game-play">PLAY NOW</div>
     </a>
     <a href="games/minesweeper.html" class="game-card fade-up">
-      <img src="https://picsum.photos/seed/gamemine/900/500" alt="マインスイーパー">
+      <img src="https://picsum.photos/seed/gamemine/700/400" alt="マインスイーパー" loading="lazy">
       <div class="game-overlay"></div>
-      <div class="game-body">
-        <div class="game-icon">💣</div>
-        <div class="game-title">マインスイーパー</div>
-        <div class="game-desc">初級〜上級 ／ 初手地雷なし保証</div>
-      </div>
+      <div class="game-body"><div class="game-icon">💣</div><div class="game-title">マインスイーパー</div><div class="game-desc">初級〜上級 ／ 初手地雷なし保証</div></div>
       <div class="game-play">PLAY NOW</div>
     </a>
   </div>
@@ -599,11 +350,11 @@
 <section class="sec" id="contact">
   <div class="fade-up">
     <p class="sec-eyebrow">Get in touch</p>
-    <h2 class="sec-title">Contact</h2>
-    <div class="sec-bar" style="margin-left: auto; margin-right: auto;"></div>
+    <h2 class="sec-title" style="text-align:center;">Contact</h2>
+    <div class="sec-bar" style="margin: 0 auto 3rem;"></div>
   </div>
   <div class="contact-visual fade-up">
-    <img src="https://picsum.photos/seed/contact1/1200/400" alt="">
+    <img src="https://picsum.photos/seed/contact1/900/380" alt="" loading="lazy">
     <div class="contact-inner">
       <p class="contact-desc">お仕事のご依頼・ご相談はお気軽にどうぞ。<br>通常2〜3営業日以内にご返信します。</p>
       <form class="contact-form" onsubmit="handleSubmit(event)">
@@ -620,12 +371,10 @@
   </div>
 </section>
 
-<footer>
-  <p>&copy; 2026 My Portfolio. All rights reserved.</p>
-</footer>
+<footer><p>&copy; 2026 My Portfolio. All rights reserved.</p></footer>
 
 <script>
-  // ===== ヒーロースライダー =====
+  // ===== スライダー =====
   const slides = document.querySelectorAll('.slide');
   const dotsEl = document.getElementById('dots');
   let cur = 0, timer;
@@ -644,56 +393,33 @@
     slides[cur].classList.add('active');
     dotsEl.children[cur].classList.add('active');
     document.getElementById('slides').style.transform = `translateX(-${cur * 100}%)`;
-    resetTimer();
-  }
-
-  function resetTimer() {
     clearInterval(timer);
     timer = setInterval(() => goTo(cur + 1), 5000);
   }
 
   document.getElementById('prevBtn').onclick = () => goTo(cur - 1);
   document.getElementById('nextBtn').onclick = () => goTo(cur + 1);
-  resetTimer();
-
-  // ===== フォトストリップ（無限ループ複製）=====
-  const stripFiles = ['ph1','ph2','ph3','ph4','ph5','ph6','ph7','ph8','ph9','ph10'];
-  const track = document.getElementById('stripTrack');
-  // 画像を2セット並べてシームレスループ
-  [stripFiles, stripFiles].forEach(set => {
-    set.forEach(s => {
-      const img = document.createElement('img');
-      img.src = `https://picsum.photos/seed/${s}/350/220`;
-      img.alt = '';
-      track.appendChild(img);
-    });
-  });
+  timer = setInterval(() => goTo(cur + 1), 5000);
 
   // ===== スクロールフェードイン =====
   const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (!entry.isIntersecting) return;
       entry.target.classList.add('visible');
-      entry.target.querySelectorAll('.skill-bar').forEach(b => {
-        b.style.width = b.dataset.width + '%';
-      });
+      entry.target.querySelectorAll('.skill-bar').forEach(b => { b.style.width = b.dataset.width + '%'; });
+      observer.unobserve(entry.target);
     });
   }, { threshold: 0.1 });
   document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 
-  // ===== フォーム送信 =====
+  // ===== フォーム =====
   function handleSubmit(e) {
     e.preventDefault();
     const btn = e.target.querySelector('.btn-send');
     btn.textContent = '送信しました ✓';
-    btn.style.background = 'linear-gradient(135deg, #059669, #34d399)';
+    btn.style.background = 'linear-gradient(135deg,#059669,#34d399)';
     btn.disabled = true;
-    setTimeout(() => {
-      btn.textContent = '送信する';
-      btn.style.background = '';
-      btn.disabled = false;
-      e.target.reset();
-    }, 3000);
+    setTimeout(() => { btn.textContent = '送信する'; btn.style.background = ''; btn.disabled = false; e.target.reset(); }, 3000);
   }
 </script>
 </body>
