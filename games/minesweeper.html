@@ -56,7 +56,7 @@
 <script>
   // ===== マインスイーパー =====
   let ROWS = 9, COLS = 9, MINES = 10;
-  let grid, revealed, flagged, gameOver, started, timerInterval, flagCount;
+  let grid, revealed, flagged, gameOver, started, timerInterval, flagCount, hitCell;
 
   const NUM_COLORS = ['','n1','n2','n3','n4','n5','n6','n7','n8'];
 
@@ -72,7 +72,7 @@
     grid = Array.from({length: ROWS}, () => Array(COLS).fill(0));
     revealed = Array.from({length: ROWS}, () => Array(COLS).fill(false));
     flagged = Array.from({length: ROWS}, () => Array(COLS).fill(false));
-    gameOver = false; started = false; flagCount = 0;
+    gameOver = false; started = false; flagCount = 0; hitCell = null;
     document.getElementById('mineCount').textContent = MINES;
     document.getElementById('timer').textContent = 0;
     document.getElementById('msg').textContent = '';
@@ -128,19 +128,14 @@
       }, 1000);
     }
     if (grid[r][c] === -1) {
-      // 地雷を踏んだ
+      // 地雷を踏んだ — 全地雷を開いてからrender
       clearInterval(timerInterval);
       gameOver = true;
-      revealed[r][c] = true;
-      render();
-      document.getElementById(`cell-${r}-${c}`).classList.add('mine-hit');
-      // 全地雷を表示
       for (let i = 0; i < ROWS; i++) for (let j = 0; j < COLS; j++) {
-        if (grid[i][j] === -1 && !flagged[i][j] && !(i===r&&j===c)) {
-          document.getElementById(`cell-${i}-${j}`).textContent = '💣';
-          document.getElementById(`cell-${i}-${j}`).classList.add('mine-show');
-        }
+        if (grid[i][j] === -1) revealed[i][j] = true;
       }
+      hitCell = `${r}-${c}`;
+      render();
       document.getElementById('msg').textContent = '💥 ゲームオーバー！';
       return;
     }
@@ -172,7 +167,7 @@
       cell.id = `cell-${r}-${c}`;
       if (revealed[r][c]) {
         cell.classList.add('open');
-        if (grid[r][c] === -1) { cell.textContent = '💣'; }
+        if (grid[r][c] === -1) { cell.textContent = '💣'; if (hitCell === `${r}-${c}`) cell.classList.add('mine-hit'); else cell.classList.add('mine-show'); }
         else if (grid[r][c] > 0) { cell.textContent = grid[r][c]; cell.classList.add(`n${grid[r][c]}`); }
       } else if (flagged[r][c]) {
         cell.classList.add('flagged');
