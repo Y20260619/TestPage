@@ -1,9 +1,664 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-  <title>TestPage</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio</title>
+  <style>
+    /* ===== リセット・基本設定 ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --accent: #7c5cbf;
+      --accent2: #c084fc;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --border: rgba(124, 92, 191, 0.3);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ===== スクロールバー ===== */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+    /* ===== 背景パーティクルキャンバス ===== */
+    #canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ===== ナビゲーション ===== */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(12px);
+      background: rgba(10,10,15,0.7);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-size: 1.4rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 2px;
+    }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: color 0.3s;
+      position: relative;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      left: 0; bottom: -4px;
+      width: 0; height: 2px;
+      background: var(--accent2);
+      transition: width 0.3s;
+    }
+    .nav-links a:hover { color: var(--accent2); }
+    .nav-links a:hover::after { width: 100%; }
+
+    /* ===== セクション共通 ===== */
+    section {
+      position: relative;
+      z-index: 1;
+      padding: 7rem 2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .section-label {
+      font-size: 0.75rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--accent2);
+      margin-bottom: 0.5rem;
+    }
+    .section-title {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+    .section-divider {
+      width: 60px; height: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 2px;
+      margin-bottom: 3rem;
+    }
+
+    /* スクロールフェードイン */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ===== ヒーローセクション ===== */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      max-width: 100%;
+      padding: 0 6vw;
+    }
+    .hero-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .hero-eyebrow span {
+      font-size: 0.85rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent2);
+    }
+    .hero-line { width: 40px; height: 1px; background: var(--accent2); }
+    .hero-name {
+      font-size: clamp(3rem, 10vw, 8rem);
+      font-weight: 900;
+      line-height: 0.95;
+      letter-spacing: -2px;
+      background: linear-gradient(135deg, #fff 30%, var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: fadeSlideUp 1s ease 0.2s both;
+    }
+    .hero-catch {
+      font-size: clamp(1rem, 2.5vw, 1.5rem);
+      color: var(--muted);
+      margin-top: 1.5rem;
+      max-width: 600px;
+      line-height: 1.7;
+      animation: fadeSlideUp 1s ease 0.4s both;
+    }
+    .hero-cta {
+      display: flex;
+      gap: 1rem;
+      margin-top: 3rem;
+      animation: fadeSlideUp 1s ease 0.6s both;
+    }
+    .btn {
+      padding: 0.85rem 2rem;
+      border-radius: 50px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.3s, box-shadow 0.3s;
+      display: inline-block;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(124,92,191,0.4);
+    }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(124,92,191,0.6); }
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { border-color: var(--accent2); color: var(--accent2); transform: translateY(-3px); }
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--muted);
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      animation: bounce 2s ease infinite;
+    }
+    .scroll-indicator::after {
+      content: '';
+      width: 1px; height: 50px;
+      background: linear-gradient(to bottom, var(--accent2), transparent);
+    }
+
+    /* ===== スキルセクション ===== */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1.5rem;
+    }
+    .skill-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .skill-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 0%, rgba(124,92,191,0.15), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .skill-card:hover { transform: translateY(-8px); border-color: var(--accent2); box-shadow: 0 20px 40px rgba(124,92,191,0.2); }
+    .skill-card:hover::before { opacity: 1; }
+    .skill-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+    .skill-name { font-weight: 700; margin-bottom: 0.5rem; font-size: 1rem; }
+    .skill-level {
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 0.75rem;
+    }
+    .skill-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 2px;
+      width: 0;
+      transition: width 1.2s ease;
+    }
+
+    /* ===== 作品紹介セクション ===== */
+    .works-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+    }
+    .work-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      transition: transform 0.4s, box-shadow 0.4s;
+    }
+    .work-card:hover { transform: translateY(-10px); box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
+    .work-img-wrap {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 16/9;
+    }
+    .work-img-wrap img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+      display: block;
+    }
+    .work-card:hover .work-img-wrap img { transform: scale(1.08); }
+    .work-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(124,92,191,0.7), transparent);
+      opacity: 0;
+      transition: opacity 0.4s;
+      display: flex;
+      align-items: flex-end;
+      padding: 1.5rem;
+    }
+    .work-card:hover .work-overlay { opacity: 1; }
+    .work-overlay-text { color: #fff; font-weight: 700; font-size: 1.1rem; }
+    .work-body { padding: 1.5rem; }
+    .work-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+    .tag {
+      font-size: 0.7rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 50px;
+      background: rgba(124,92,191,0.2);
+      color: var(--accent2);
+      letter-spacing: 1px;
+    }
+    .work-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .work-desc { color: var(--muted); font-size: 0.875rem; line-height: 1.6; }
+
+    /* ===== お問い合わせセクション ===== */
+    #contact { text-align: center; }
+    .contact-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 4rem 3rem;
+      max-width: 600px;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+    }
+    .contact-box::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: radial-gradient(circle at 50% 50%, rgba(124,92,191,0.1), transparent 60%);
+      animation: rotateBg 15s linear infinite;
+    }
+    .contact-box > * { position: relative; z-index: 1; }
+    .contact-desc { color: var(--muted); margin-bottom: 2.5rem; line-height: 1.8; }
+    .form-group { margin-bottom: 1.25rem; text-align: left; }
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+    }
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: border-color 0.3s, box-shadow 0.3s;
+      outline: none;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: var(--accent2);
+      box-shadow: 0 0 0 3px rgba(192,132,252,0.15);
+    }
+    .form-group textarea { resize: vertical; min-height: 120px; }
+    .btn-submit {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: transform 0.3s, box-shadow 0.3s;
+      margin-top: 0.5rem;
+    }
+    .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(124,92,191,0.5); }
+
+    /* ===== フッター ===== */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 2rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    /* ===== キーフレーム ===== */
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50%       { transform: translateX(-50%) translateY(10px); }
+    }
+    @keyframes rotateBg {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    /* ===== レスポンシブ ===== */
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .hero-cta { flex-direction: column; }
+      .contact-box { padding: 2.5rem 1.5rem; }
+    }
+  </style>
 </head>
 <body>
-  <h1>Hello, World!</h1>
+
+<!-- 背景パーティクルキャンバス -->
+<canvas id="canvas"></canvas>
+
+<!-- ナビゲーション -->
+<nav>
+  <div class="nav-logo">Portfolio</div>
+  <ul class="nav-links">
+    <li><a href="#hero">Home</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#works">Works</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- ヒーローセクション -->
+<section id="hero">
+  <div class="hero-eyebrow">
+    <div class="hero-line"></div>
+    <span>Welcome to my portfolio</span>
+  </div>
+  <h1 class="hero-name">My<br>Portfolio</h1>
+  <p class="hero-catch">
+    アイデアをコードに変え、ユーザーに届けるウェブ体験をつくります。<br>
+    シンプルで美しく、使いやすいプロダクトを追求しています。
+  </p>
+  <div class="hero-cta">
+    <a href="#works" class="btn btn-primary">作品を見る</a>
+    <a href="#contact" class="btn btn-outline">連絡する</a>
+  </div>
+  <div class="scroll-indicator">Scroll</div>
+</section>
+
+<!-- スキルセクション -->
+<section id="skills">
+  <p class="section-label fade-up">Expertise</p>
+  <h2 class="section-title fade-up">Skills</h2>
+  <div class="section-divider fade-up"></div>
+  <div class="skills-grid">
+    <div class="skill-card fade-up">
+      <div class="skill-icon">🌐</div>
+      <div class="skill-name">HTML / CSS</div>
+      <div class="skill-level"><div class="skill-bar" data-width="95"></div></div>
+    </div>
+    <div class="skill-card fade-up">
+      <div class="skill-icon">⚡</div>
+      <div class="skill-name">JavaScript</div>
+      <div class="skill-level"><div class="skill-bar" data-width="85"></div></div>
+    </div>
+    <div class="skill-card fade-up">
+      <div class="skill-icon">⚛️</div>
+      <div class="skill-name">React</div>
+      <div class="skill-level"><div class="skill-bar" data-width="78"></div></div>
+    </div>
+    <div class="skill-card fade-up">
+      <div class="skill-icon">🐍</div>
+      <div class="skill-name">Python</div>
+      <div class="skill-level"><div class="skill-bar" data-width="70"></div></div>
+    </div>
+    <div class="skill-card fade-up">
+      <div class="skill-icon">🎨</div>
+      <div class="skill-name">UI Design</div>
+      <div class="skill-level"><div class="skill-bar" data-width="80"></div></div>
+    </div>
+    <div class="skill-card fade-up">
+      <div class="skill-icon">🗄️</div>
+      <div class="skill-name">SQL / DB</div>
+      <div class="skill-level"><div class="skill-bar" data-width="65"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 作品紹介セクション -->
+<section id="works">
+  <p class="section-label fade-up">Featured</p>
+  <h2 class="section-title fade-up">Works</h2>
+  <div class="section-divider fade-up"></div>
+  <div class="works-grid">
+    <div class="work-card fade-up">
+      <div class="work-img-wrap">
+        <img src="https://picsum.photos/seed/work1/640/360" alt="Project Alpha">
+        <div class="work-overlay"><div class="work-overlay-text">詳細を見る →</div></div>
+      </div>
+      <div class="work-body">
+        <div class="work-tags">
+          <span class="tag">React</span><span class="tag">TypeScript</span>
+        </div>
+        <div class="work-title">Project Alpha</div>
+        <div class="work-desc">ダッシュボードUIをReactで構築。リアルタイムデータの可視化と直感的な操作性を両立。</div>
+      </div>
+    </div>
+    <div class="work-card fade-up">
+      <div class="work-img-wrap">
+        <img src="https://picsum.photos/seed/work2/640/360" alt="Project Beta">
+        <div class="work-overlay"><div class="work-overlay-text">詳細を見る →</div></div>
+      </div>
+      <div class="work-body">
+        <div class="work-tags">
+          <span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">JS</span>
+        </div>
+        <div class="work-title">Project Beta</div>
+        <div class="work-desc">アニメーションを駆使したランディングページ。コンバージョン率150%改善を達成。</div>
+      </div>
+    </div>
+    <div class="work-card fade-up">
+      <div class="work-img-wrap">
+        <img src="https://picsum.photos/seed/work3/640/360" alt="Project Gamma">
+        <div class="work-overlay"><div class="work-overlay-text">詳細を見る →</div></div>
+      </div>
+      <div class="work-body">
+        <div class="work-tags">
+          <span class="tag">Python</span><span class="tag">API</span>
+        </div>
+        <div class="work-title">Project Gamma</div>
+        <div class="work-desc">PythonバックエンドとREST APIを設計・実装。大量データの高速処理を実現。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- お問い合わせセクション -->
+<section id="contact">
+  <p class="section-label fade-up">Get in touch</p>
+  <h2 class="section-title fade-up">Contact</h2>
+  <div class="section-divider fade-up" style="margin: 0 auto 3rem;"></div>
+  <div class="contact-box fade-up">
+    <p class="contact-desc">
+      お仕事のご依頼・ご相談はお気軽にどうぞ。<br>
+      通常2〜3営業日以内にご返信します。
+    </p>
+    <form onsubmit="handleSubmit(event)">
+      <div class="form-group">
+        <label>お名前</label>
+        <input type="text" placeholder="山田 太郎" required>
+      </div>
+      <div class="form-group">
+        <label>メールアドレス</label>
+        <input type="email" placeholder="example@email.com" required>
+      </div>
+      <div class="form-group">
+        <label>メッセージ</label>
+        <textarea placeholder="ご依頼内容をお書きください..." required></textarea>
+      </div>
+      <button type="submit" class="btn-submit">送信する</button>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <p>&copy; 2026 My Portfolio. All rights reserved.</p>
+</footer>
+
+<script>
+  // ===== 背景パーティクルアニメーション =====
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // パーティクルを初期化
+  for (let i = 0; i < 80; i++) {
+    particles.push({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      r: Math.random() * 2 + 0.5,
+      dx: (Math.random() - 0.5) * 0.4,
+      dy: (Math.random() - 0.5) * 0.4,
+      alpha: Math.random() * 0.5 + 0.1,
+    });
+  }
+
+  // マウス位置を追従
+  let mouse = { x: null, y: null };
+  window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+
+  function drawParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach((p, i) => {
+      // パーティクル本体
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(192,132,252,${p.alpha})`;
+      ctx.fill();
+
+      // マウス近傍に線を引く
+      if (mouse.x !== null) {
+        const dx = mouse.x - p.x, dy = mouse.y - p.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 150) {
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(mouse.x, mouse.y);
+          ctx.strokeStyle = `rgba(124,92,191,${0.2 * (1 - dist / 150)})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+
+      // 近傍パーティクル同士を結ぶ線
+      for (let j = i + 1; j < particles.length; j++) {
+        const q = particles[j];
+        const dx = p.x - q.x, dy = p.y - q.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 100) {
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(q.x, q.y);
+          ctx.strokeStyle = `rgba(124,92,191,${0.15 * (1 - dist / 100)})`;
+          ctx.lineWidth = 0.4;
+          ctx.stroke();
+        }
+      }
+
+      // 移動・端の折り返し
+      p.x += p.dx; p.y += p.dy;
+      if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+      if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+    });
+    requestAnimationFrame(drawParticles);
+  }
+  drawParticles();
+
+  // ===== スクロールフェードイン =====
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('visible');
+      // スキルバーの幅をアニメーション
+      entry.target.querySelectorAll('.skill-bar').forEach(bar => {
+        bar.style.width = bar.dataset.width + '%';
+      });
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  // ===== フォーム送信 =====
+  function handleSubmit(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('.btn-submit');
+    btn.textContent = '送信しました ✓';
+    btn.style.background = 'linear-gradient(135deg, #059669, #34d399)';
+    btn.disabled = true;
+    setTimeout(() => {
+      btn.textContent = '送信する';
+      btn.style.background = '';
+      btn.disabled = false;
+      e.target.reset();
+    }, 3000);
+  }
+</script>
 </body>
 </html>
