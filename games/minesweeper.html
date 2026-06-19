@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>マインスイーパー</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0a0a0f; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 0.75rem; }
+    h1 { font-size: 1.5rem; background: linear-gradient(135deg,#7c5cbf,#c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    #info { font-size: 0.8rem; color: #94a3b8; }
+    #hud { display: flex; gap: 2rem; font-size: 1rem; }
+    #hud span { color: #c084fc; font-weight: 700; }
+    #difficulty { display: flex; gap: 0.5rem; }
+    .diff-btn { padding: 0.3rem 1rem; border-radius: 50px; border: 1px solid rgba(124,92,191,0.4); background: transparent; color: #94a3b8; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+    .diff-btn.active, .diff-btn:hover { background: linear-gradient(135deg,#7c5cbf,#c084fc); color: #fff; border-color: transparent; }
+    #board { display: grid; gap: 2px; }
+    .cell {
+      width: 28px; height: 28px;
+      background: rgba(124,92,191,0.15);
+      border: 1px solid rgba(124,92,191,0.3);
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+    .cell:hover:not(.open):not(.flagged) { background: rgba(124,92,191,0.35); }
+    .cell.open { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.08); cursor: default; }
+    .cell.flagged { background: rgba(248,113,113,0.2); border-color: rgba(248,113,113,0.5); }
+    .cell.mine-hit { background: rgba(248,113,113,0.6); }
+    .cell.mine-show { background: rgba(255,255,255,0.05); }
+    .n1{color:#38bdf8} .n2{color:#34d399} .n3{color:#f87171} .n4{color:#7c5cbf} .n5{color:#fbbf24} .n6{color:#c084fc} .n7{color:#e2e8f0} .n8{color:#94a3b8}
+    #msg { font-size: 1.1rem; font-weight: 700; color: #c084fc; min-height: 1.5rem; }
+    .btn { padding: 0.6rem 2rem; background: linear-gradient(135deg,#7c5cbf,#c084fc); color: #fff; border: none; border-radius: 50px; font-size: 0.9rem; font-weight: 700; cursor: pointer; }
+    .btn:hover { opacity: 0.85; }
+    #back { color: #94a3b8; font-size: 0.8rem; text-decoration: none; }
+    #back:hover { color: #c084fc; }
+  </style>
+</head>
+<body>
+  <h1>マインスイーパー</h1>
+  <div id="info">左クリック: 開く &nbsp;|&nbsp; 右クリック: 旗を立てる</div>
+  <div id="difficulty">
+    <button class="diff-btn active" onclick="setDiff(9,9,10,this)">初級</button>
+    <button class="diff-btn" onclick="setDiff(16,16,40,this)">中級</button>
+    <button class="diff-btn" onclick="setDiff(16,30,99,this)">上級</button>
+  </div>
+  <div id="hud">💣 <span id="mineCount">10</span> &nbsp; ⏱ <span id="timer">0</span>s</div>
+  <div id="board"></div>
+  <div id="msg"></div>
+  <button class="btn" onclick="init()">リスタート</button>
+  <a href="../index.html" id="back">← ポートフォリオへ戻る</a>
+
+<script>
+  // ===== マインスイーパー =====
+  let ROWS = 9, COLS = 9, MINES = 10;
+  let grid, revealed, flagged, gameOver, started, timerInterval, flagCount;
+
+  const NUM_COLORS = ['','n1','n2','n3','n4','n5','n6','n7','n8'];
+
+  function setDiff(r, c, m, btn) {
+    ROWS = r; COLS = c; MINES = m;
+    document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    init();
+  }
+
+  function init() {
+    clearInterval(timerInterval);
+    grid = Array.from({length: ROWS}, () => Array(COLS).fill(0));
+    revealed = Array.from({length: ROWS}, () => Array(COLS).fill(false));
+    flagged = Array.from({length: ROWS}, () => Array(COLS).fill(false));
+    gameOver = false; started = false; flagCount = 0;
+    document.getElementById('mineCount').textContent = MINES;
+    document.getElementById('timer').textContent = 0;
+    document.getElementById('msg').textContent = '';
+    render();
+  }
+
+  // 最初のクリック後に地雷を配置（踏まないよう保証）
+  function placeMines(safeR, safeC) {
+    let placed = 0;
+    while (placed < MINES) {
+      const r = Math.floor(Math.random() * ROWS);
+      const c = Math.floor(Math.random() * COLS);
+      if (grid[r][c] === -1) continue;
+      if (Math.abs(r - safeR) <= 1 && Math.abs(c - safeC) <= 1) continue;
+      grid[r][c] = -1; placed++;
+    }
+    // 数字を計算
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+      if (grid[r][c] === -1) continue;
+      grid[r][c] = neighbors(r, c).filter(([nr, nc]) => grid[nr][nc] === -1).length;
+    }
+  }
+
+  function neighbors(r, c) {
+    const res = [];
+    for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+      if (dr === 0 && dc === 0) continue;
+      const nr = r + dr, nc = c + dc;
+      if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) res.push([nr, nc]);
+    }
+    return res;
+  }
+
+  function reveal(r, c) {
+    if (revealed[r][c] || flagged[r][c]) return;
+    revealed[r][c] = true;
+    if (grid[r][c] === 0) neighbors(r, c).forEach(([nr, nc]) => reveal(nr, nc));
+  }
+
+  function checkWin() {
+    return grid.flat().filter(v => v !== -1).length ===
+           revealed.flat().filter(Boolean).length;
+  }
+
+  function handleClick(r, c) {
+    if (gameOver || revealed[r][c] || flagged[r][c]) return;
+    if (!started) {
+      started = true;
+      placeMines(r, c);
+      let t = 0;
+      timerInterval = setInterval(() => {
+        document.getElementById('timer').textContent = ++t;
+      }, 1000);
+    }
+    if (grid[r][c] === -1) {
+      // 地雷を踏んだ
+      clearInterval(timerInterval);
+      gameOver = true;
+      revealed[r][c] = true;
+      render();
+      document.getElementById(`cell-${r}-${c}`).classList.add('mine-hit');
+      // 全地雷を表示
+      for (let i = 0; i < ROWS; i++) for (let j = 0; j < COLS; j++) {
+        if (grid[i][j] === -1 && !flagged[i][j] && !(i===r&&j===c)) {
+          document.getElementById(`cell-${i}-${j}`).textContent = '💣';
+          document.getElementById(`cell-${i}-${j}`).classList.add('mine-show');
+        }
+      }
+      document.getElementById('msg').textContent = '💥 ゲームオーバー！';
+      return;
+    }
+    reveal(r, c);
+    render();
+    if (checkWin()) {
+      clearInterval(timerInterval);
+      gameOver = true;
+      document.getElementById('msg').textContent = '🎉 クリア！';
+    }
+  }
+
+  function handleFlag(e, r, c) {
+    e.preventDefault();
+    if (gameOver || revealed[r][c]) return;
+    flagged[r][c] = !flagged[r][c];
+    flagCount += flagged[r][c] ? 1 : -1;
+    document.getElementById('mineCount').textContent = MINES - flagCount;
+    render();
+  }
+
+  function render() {
+    const boardEl = document.getElementById('board');
+    boardEl.style.gridTemplateColumns = `repeat(${COLS}, 28px)`;
+    boardEl.innerHTML = '';
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.id = `cell-${r}-${c}`;
+      if (revealed[r][c]) {
+        cell.classList.add('open');
+        if (grid[r][c] === -1) { cell.textContent = '💣'; }
+        else if (grid[r][c] > 0) { cell.textContent = grid[r][c]; cell.classList.add(`n${grid[r][c]}`); }
+      } else if (flagged[r][c]) {
+        cell.classList.add('flagged');
+        cell.textContent = '🚩';
+      }
+      cell.addEventListener('click', () => handleClick(r, c));
+      cell.addEventListener('contextmenu', e => handleFlag(e, r, c));
+      boardEl.appendChild(cell);
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Color Drop</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0a0a0f; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
+    h1 { font-size: 1.5rem; margin-bottom: 0.5rem; background: linear-gradient(135deg,#7c5cbf,#c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    #info { font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.75rem; }
+    #score-line { display: flex; gap: 2rem; margin-bottom: 0.75rem; font-size: 1rem; }
+    #score-line span { color: #c084fc; font-weight: 700; }
+    canvas { border: 2px solid rgba(124,92,191,0.4); border-radius: 8px; display: block; }
+    #msg { margin-top: 1rem; font-size: 1.1rem; font-weight: 700; color: #c084fc; min-height: 1.5rem; }
+    .btn { margin-top: 0.75rem; padding: 0.6rem 2rem; background: linear-gradient(135deg,#7c5cbf,#c084fc); color: #fff; border: none; border-radius: 50px; font-size: 0.9rem; font-weight: 700; cursor: pointer; }
+    .btn:hover { opacity: 0.85; }
+    #back { margin-top: 0.5rem; color: #94a3b8; font-size: 0.8rem; text-decoration: none; }
+    #back:hover { color: #c084fc; }
+    #next-wrap { display: flex; flex-direction: column; align-items: center; }
+    #next-label { font-size: 0.75rem; color: #94a3b8; margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Color Drop</h1>
+  <div id="info">← → 移動 &nbsp;|&nbsp; Space 即落とし &nbsp;|&nbsp; ↑ 回転</div>
+  <div id="score-line">
+    スコア: <span id="score">0</span> &nbsp; レベル: <span id="level">1</span>
+  </div>
+  <div style="display:flex;gap:1.5rem;align-items:flex-start">
+    <canvas id="board" width="200" height="400"></canvas>
+    <div id="next-wrap">
+      <div id="next-label">NEXT</div>
+      <canvas id="next" width="80" height="80"></canvas>
+    </div>
+  </div>
+  <div id="msg"></div>
+  <button class="btn" id="startBtn" onclick="startGame()">スタート</button>
+  <a href="../index.html" id="back">← ポートフォリオへ戻る</a>
+
+<script>
+  // ===== カラードロップ（落ちゲー）=====
+  const COLS = 10, ROWS = 20, SZ = 20;
+  const COLORS = ['#c084fc','#7c5cbf','#38bdf8','#34d399','#fbbf24','#f87171','#fb923c'];
+
+  // ピースの形状定義
+  const SHAPES = [
+    [[1,1,1,1]],                        // I
+    [[1,1],[1,1]],                       // O
+    [[0,1,0],[1,1,1]],                   // T
+    [[1,0],[1,0],[1,1]],                 // L
+    [[0,1],[0,1],[1,1]],                 // J
+    [[0,1,1],[1,1,0]],                   // S
+    [[1,1,0],[0,1,1]],                   // Z
+  ];
+
+  const board = document.getElementById('board');
+  const ctx = board.getContext('2d');
+  const nextCanvas = document.getElementById('next');
+  const nctx = nextCanvas.getContext('2d');
+
+  let grid, piece, nextPiece, score, level, lines, raf, dropping;
+
+  function newGrid() { return Array.from({length: ROWS}, () => Array(COLS).fill(0)); }
+
+  function randPiece() {
+    const i = Math.floor(Math.random() * SHAPES.length);
+    const c = Math.floor(Math.random() * COLORS.length);
+    return { shape: SHAPES[i].map(r => [...r]), color: COLORS[c], x: Math.floor(COLS/2) - Math.floor(SHAPES[i][0].length/2), y: 0 };
+  }
+
+  function rotate(shape) {
+    return shape[0].map((_, c) => shape.map(r => r[c]).reverse());
+  }
+
+  function collide(p, g) {
+    return p.shape.some((row, r) =>
+      row.some((v, c) => {
+        if (!v) return false;
+        const nx = p.x + c, ny = p.y + r;
+        return nx < 0 || nx >= COLS || ny >= ROWS || (ny >= 0 && g[ny][nx]);
+      })
+    );
+  }
+
+  function place(p, g) {
+    p.shape.forEach((row, r) => row.forEach((v, c) => {
+      if (v && p.y + r >= 0) g[p.y + r][p.x + c] = p.color;
+    }));
+  }
+
+  function clearLines(g) {
+    let cleared = 0;
+    for (let r = ROWS - 1; r >= 0; r--) {
+      if (g[r].every(c => c)) { g.splice(r, 1); g.unshift(Array(COLS).fill(0)); cleared++; r++; }
+    }
+    return cleared;
+  }
+
+  function drawBlock(c, x, y, sz, context) {
+    context.fillStyle = c;
+    context.fillRect(x * sz + 1, y * sz + 1, sz - 2, sz - 2);
+    context.fillStyle = 'rgba(255,255,255,0.2)';
+    context.fillRect(x * sz + 1, y * sz + 1, sz - 2, 4);
+  }
+
+  function drawBoard() {
+    ctx.clearRect(0, 0, board.width, board.height);
+    // グリッド線
+    ctx.strokeStyle = 'rgba(124,92,191,0.1)';
+    for (let r = 0; r < ROWS; r++) { ctx.beginPath(); ctx.moveTo(0, r*SZ); ctx.lineTo(COLS*SZ, r*SZ); ctx.stroke(); }
+    for (let c = 0; c < COLS; c++) { ctx.beginPath(); ctx.moveTo(c*SZ, 0); ctx.lineTo(c*SZ, ROWS*SZ); ctx.stroke(); }
+    // 固定ブロック
+    grid.forEach((row, r) => row.forEach((v, c) => { if (v) drawBlock(v, c, r, SZ, ctx); }));
+    // ゴースト
+    if (piece) {
+      const ghost = { ...piece, shape: piece.shape.map(r => [...r]) };
+      while (!collide({ ...ghost, y: ghost.y + 1 }, grid)) ghost.y++;
+      piece.shape.forEach((row, r) => row.forEach((v, c) => {
+        if (v) { ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.fillRect((ghost.x+c)*SZ+1, (ghost.y+r)*SZ+1, SZ-2, SZ-2); }
+      }));
+      piece.shape.forEach((row, r) => row.forEach((v, c) => { if (v) drawBlock(piece.color, piece.x+c, piece.y+r, SZ, ctx); }));
+    }
+  }
+
+  function drawNext() {
+    nctx.clearRect(0, 0, 80, 80);
+    if (!nextPiece) return;
+    const offX = Math.floor((4 - nextPiece.shape[0].length) / 2);
+    const offY = Math.floor((4 - nextPiece.shape.length) / 2);
+    nextPiece.shape.forEach((row, r) => row.forEach((v, c) => { if (v) drawBlock(nextPiece.color, offX+c, offY+r, 20, nctx); }));
+  }
+
+  function drop() {
+    piece.y++;
+    if (collide(piece, grid)) {
+      piece.y--;
+      place(piece, grid);
+      const c = clearLines(grid);
+      lines += c;
+      score += [0,100,300,500,800][c] * level;
+      level = Math.floor(lines / 10) + 1;
+      document.getElementById('score').textContent = score;
+      document.getElementById('level').textContent = level;
+      piece = nextPiece;
+      nextPiece = randPiece();
+      drawNext();
+      if (collide(piece, grid)) { gameOver(); return; }
+    }
+    drawBoard();
+    dropping = setTimeout(drop, Math.max(100, 600 - level * 50));
+  }
+
+  function gameOver() {
+    document.getElementById('msg').textContent = `ゲームオーバー！ スコア: ${score}`;
+    document.getElementById('startBtn').style.display = 'inline-block';
+    piece = null; drawBoard();
+  }
+
+  function startGame() {
+    clearTimeout(dropping);
+    cancelAnimationFrame(raf);
+    grid = newGrid();
+    piece = randPiece();
+    nextPiece = randPiece();
+    score = 0; level = 1; lines = 0;
+    document.getElementById('score').textContent = 0;
+    document.getElementById('level').textContent = 1;
+    document.getElementById('msg').textContent = '';
+    document.getElementById('startBtn').style.display = 'none';
+    drawNext();
+    drop();
+  }
+
+  document.addEventListener('keydown', e => {
+    if (!piece) return;
+    if (e.key === 'ArrowLeft')  { piece.x--; if (collide(piece, grid)) piece.x++; drawBoard(); }
+    if (e.key === 'ArrowRight') { piece.x++; if (collide(piece, grid)) piece.x--; drawBoard(); }
+    if (e.key === 'ArrowUp') {
+      const rotated = rotate(piece.shape);
+      const prev = piece.shape; piece.shape = rotated;
+      if (collide(piece, grid)) piece.shape = prev;
+      drawBoard();
+    }
+    if (e.key === ' ') {
+      e.preventDefault();
+      while (!collide({ ...piece, y: piece.y + 1 }, grid)) piece.y++;
+      clearTimeout(dropping); drop();
+    }
+    if (e.key === 'ArrowDown') { clearTimeout(dropping); drop(); }
+  });
+
+  drawBoard();
+</script>
+</body>
+</html>
